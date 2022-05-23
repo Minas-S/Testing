@@ -1,0 +1,55 @@
+import datetime
+
+import git
+import json
+import mysql.connector
+import pandas as p
+from pathlib import Path
+import shutil
+
+d = datetime.datetime.today()
+dat = str(d.date())
+
+with open("creds.json", 'r') as f:
+    creds = json.load(f)
+
+git.Repo.clone_from('https://'+creds["user"]+':'+creds["password"]+'@github.com/Minas-S/Testing', 'C://Users/936873/Downloads/Git-test')
+
+
+
+#zippath="C:\\Users\\936873\\Downloads\\Git-test\\ziptest.zip"
+
+#filepath = Path('C:\\Users\\936873\\Downloads\\Git-test\\Dev\\')
+#filepath.parent.mkdir(parents=True, exist_ok=True)
+
+
+# connection
+con = mysql.connector.connect(host="localhost",
+                              database='movies',
+                              user='root',
+                              password='Misain@33')
+
+# data retrieval
+df = p.read_sql("select table_name from information_schema.tables WHERE TABLE_SCHEMA='movies'", con)
+for t in df['table_name']:
+    sql="select * from " +t
+    df1 = p.read_sql(sql, con)
+    fp="C:\\Users\\936873\\Downloads\\Git-test\\CDPO_" +dat
+    filepath = Path(fp + "\\"+"Dev\\" + t + '.csv')
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    df1.to_csv(filepath, index=False)
+
+shutil.make_archive("C:\\Users\\936873\\Downloads\\Git-test\\CDPO_"+dat, "zip", "C:\\Users\\936873\\Downloads\\Git-test" , "CDPO_"+dat)
+
+
+#with open(zippath, 'wb') as zip:
+    #repo.archive(zip, format='zip')
+
+'''repo = git.Repo("C:\\Users\\936873\\Downloads\\Git-test")
+repo.git.add("C:\\Users\\936873\\Downloads\\Git-test\\CDPO_"+dat)
+
+if repo.is_dirty(untracked_files=True):
+    repo.index.add("CDPO_"+dat)
+    repo.index.commit("Zip uploaded")
+    repo.remotes.origin.push()'''
+
